@@ -28,7 +28,7 @@ import eliopi.nile.Poster
 import java.io.File
 import java.io.FileOutputStream
 
-
+// Project syncronized with GitHub
 class MainActivity : AppCompatActivity() {
     private lateinit var listView: ListView
     private var listAdvert: ArrayList<Advert> = ArrayList()
@@ -178,7 +178,7 @@ class MainActivity : AppCompatActivity() {
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, fOut)
             fOut.flush()
             fOut.close()
-            file.setReadable(true, false);
+            file.setReadable(true, false)
             val intent = Intent(Intent.ACTION_SEND)
             intent.type = "image/*"
             intent.putExtra(Intent.EXTRA_STREAM,Uri.fromFile(file))
@@ -215,8 +215,6 @@ class MainActivity : AppCompatActivity() {
                     },
                     Response.ErrorListener {
                         Log.d("SERVER", "Result$it")
-                        Toast.makeText(applicationContext, "Error " + it.toString(),
-                                Toast.LENGTH_LONG)
                     })
             queue.add(stringRequest)
         }
@@ -242,8 +240,6 @@ class MainActivity : AppCompatActivity() {
                 },
                 Response.ErrorListener {
                     Log.d("SERVER", "Result$it")
-                    Toast.makeText(applicationContext, "Error " + it.toString(),
-                            Toast.LENGTH_LONG)
                 })
         queue.add(stringRequest)
     }
