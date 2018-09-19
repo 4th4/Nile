@@ -28,7 +28,7 @@ import eliopi.nile.Poster
 import java.io.File
 import java.io.FileOutputStream
 
-// Project syncronized with GitHub
+// Project synchronized with GitHub
 class MainActivity : AppCompatActivity() {
     private lateinit var listView: ListView
     private var listAdvert: ArrayList<Advert> = ArrayList()
