@@ -1,6 +1,7 @@
 package com.example.a4th4.qradvert
 
 import android.animation.ObjectAnimator
+import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.graphics.Bitmap
@@ -16,6 +17,7 @@ import java.lang.Exception
 import java.util.ArrayList
 import android.support.v7.app.AlertDialog
 import android.net.Uri
+import android.os.Environment
 import android.util.Log
 import com.android.volley.Request
 import com.android.volley.RequestQueue
@@ -24,9 +26,11 @@ import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.google.gson.JsonArray
+import com.google.gson.JsonObject
+import com.google.gson.reflect.TypeToken
 import eliopi.nile.Poster
-import java.io.File
-import java.io.FileOutputStream
+import java.io.*
 
 // Project synchronized with GitHub!!!
 class MainActivity : AppCompatActivity() {
@@ -57,6 +61,7 @@ class MainActivity : AppCompatActivity() {
     private val TAG_ENCODE="encode"
     private val TAG_DECODE="decode"
 
+    private val fileName = "adverts.txt"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,6 +74,7 @@ class MainActivity : AppCompatActivity() {
         edtTitle = findViewById(R.id.edt_title)
         edtDescription = findViewById(R.id.edt_description)
         listView.divider = null
+        readFile()
         adapter = AdvertAdapter(this, listAdvert)
         listView.adapter = adapter
         fab = findViewById(R.id.fab)
@@ -211,6 +217,7 @@ class MainActivity : AppCompatActivity() {
                                 listAdvert.add(formAdvert(deSymbol(resp.name,TAG_DECODE),
                                         deSymbol(resp.about,TAG_DECODE),resp.id))
                                 listView.adapter = adapter
+                                writeFile()
                         }
                     },
                     Response.ErrorListener {
@@ -226,7 +233,7 @@ class MainActivity : AppCompatActivity() {
                 Response.Listener<String> { response ->
                     // Display the first 500 characters of the response string.
                     Log.d("SERVER", "Result$response")
-                    if (response != null) {
+                    if (response != null && response.isEmpty()){
                         val resp = gson.fromJson(response, Poster::class.java)
                         val fAdv = listAdvert.find {it.id == resp.id}
                         if(fAdv != null) {
@@ -235,8 +242,9 @@ class MainActivity : AppCompatActivity() {
                             listAdvert.add(formAdvert(deSymbol(resp.name,TAG_DECODE),
                                     deSymbol(resp.about,TAG_DECODE),resp.id))
                             listView.adapter = adapter
+                            writeFile()
                         }
-                    }
+                    }else{Toast.makeText(applicationContext,"This advert doesn't exist!",Toast.LENGTH_SHORT).show()}
                 },
                 Response.ErrorListener {
                     Log.d("SERVER", "Result$it")
@@ -264,6 +272,27 @@ class MainActivity : AppCompatActivity() {
                     .replace( REPLACE_HASHTAG,"#")
                     .replace(REPLACE_DEGREE,"^")
         }
+    }
+
+    private fun readFile(){
+        Log.d("SERVER","read file")
+        try {
+            val reader = FileReader(File(Environment.getExternalStorageDirectory(),fileName))
+            listAdvert = gson.fromJson(reader.readText(),
+                    object : TypeToken<ArrayList<Advert>>(){}.type) as ArrayList<Advert>
+            reader.close()
+        }catch (e:Exception){e.printStackTrace()
+            Log.d("SERVER","Exception = $e")
+        }
+    }
+
+    private fun writeFile(){
+        val file = File(Environment.getExternalStorageDirectory(),fileName)
+        Log.d("SERVER","onDestroy FILE PATH " + file.absolutePath)
+        val writer = FileWriter(file)
+        writer.write(gson.toJson(listAdvert))
+        writer.flush()
+        writer.close()
     }
 }
 
