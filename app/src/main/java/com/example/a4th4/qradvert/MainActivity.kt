@@ -1,11 +1,12 @@
 package com.example.a4th4.qradvert
 
 import android.animation.ObjectAnimator
-import android.content.Context
+import android.app.Dialog
 import android.content.Intent
 import android.content.pm.ActivityInfo
-import android.graphics.Bitmap
-import android.graphics.Color
+import android.content.res.Resources
+import android.graphics.*
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
@@ -18,7 +19,11 @@ import java.util.ArrayList
 import android.support.v7.app.AlertDialog
 import android.net.Uri
 import android.os.Environment
+import android.support.annotation.ColorRes
+import android.support.v4.content.ContextCompat
 import android.util.Log
+import android.view.Window
+import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.Response
@@ -26,9 +31,8 @@ import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import com.google.gson.JsonArray
-import com.google.gson.JsonObject
 import com.google.gson.reflect.TypeToken
+import dmax.dialog.SpotsDialog
 import eliopi.nile.Poster
 import java.io.*
 
@@ -46,6 +50,7 @@ class MainActivity : AppCompatActivity() {
     private var flag: Boolean = false
     private lateinit var qrScan: IntentIntegrator
     private lateinit var queue : RequestQueue
+    private val timeoutDuration = 10000
     private val gson: Gson = GsonBuilder().create()
     private lateinit var adapter:AdvertAdapter
 
@@ -203,12 +208,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun addAdvert(view: View){
-        view.setOnClickListener {
+        view.setOnClickListener { _ ->
+            val dialog = dialogProgress()
+            dialog.show()
             Log.d("SERVER", "AddAdvertMethod")
             val url = generateUrl(typeAdd,edtTitle.text.toString(),edtDescription.text.toString())
             Log.d("SERVER", "url $url")
             val stringRequest = StringRequest(Request.Method.POST, url,
                     Response.Listener<String> { response ->
+                        dialog.cancel()
                         // Display the first 500 characters of the response string.
                         Log.d("SERVER", "Result$response")
                         if (response != null) {
@@ -221,19 +229,24 @@ class MainActivity : AppCompatActivity() {
                         }
                     },
                     Response.ErrorListener {
+                        dialog.cancel()
                         Log.d("SERVER", "Result$it")
                     })
+            stringRequest.retryPolicy = DefaultRetryPolicy(timeoutDuration,2,2.0f)
             queue.add(stringRequest)
         }
     }
 
     private fun viewAdvert(id:String){
+        val dialog = dialogProgress()
+        dialog.show()
         val stringRequest = StringRequest(Request.Method.POST, generateUrl(typeView,id,
                 ""),
                 Response.Listener<String> { response ->
                     // Display the first 500 characters of the response string.
                     Log.d("SERVER", "Result$response")
-                    if (response != null && response.isEmpty()){
+                    dialog.cancel()
+                    if (response != null && !response.isEmpty()){
                         val resp = gson.fromJson(response, Poster::class.java)
                         val fAdv = listAdvert.find {it.id == resp.id}
                         if(fAdv != null) {
@@ -248,7 +261,9 @@ class MainActivity : AppCompatActivity() {
                 },
                 Response.ErrorListener {
                     Log.d("SERVER", "Result$it")
+                    dialog.cancel()
                 })
+        stringRequest.retryPolicy = DefaultRetryPolicy(timeoutDuration,2,2.0f)
         queue.add(stringRequest)
     }
 
@@ -293,6 +308,20 @@ class MainActivity : AppCompatActivity() {
         writer.write(gson.toJson(listAdvert))
         writer.flush()
         writer.close()
+    }
+
+    private fun dialogProgress() : Dialog {
+        val dialog = Dialog(this)
+        val view = layoutInflater.inflate(R.layout.dialog_progress,null)
+        view.findViewById<ProgressBar>(R.id.progressBar)
+                .indeterminateDrawable.colorFilter = PorterDuffColorFilter(
+                ContextCompat.getColor(applicationContext, R.color.colorPrimary),
+                PorterDuff.Mode.MULTIPLY)
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog.window.setLayout(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT)
+        dialog.window.setBackgroundDrawable(ColorDrawable(ContextCompat.getColor(applicationContext, android.R.color.transparent)))
+        dialog.setContentView(view)
+        return dialog
     }
 }
 
