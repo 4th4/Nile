@@ -22,7 +22,7 @@
         android:layout_marginTop="8dp"
         android:background="@drawable/btn"
         android:fontFamily="@font/avenir_next_regular"
-        android:text="Save"
+        android:text="Share"
         android:textColor="@color/colorPrimary" />
 
 </RelativeLayout>

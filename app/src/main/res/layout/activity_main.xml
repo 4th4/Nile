@@ -67,7 +67,6 @@
             android:paddingStart="8dp"
             android:textColor="@color/colorPrimary"
             android:textColorLink="@color/colorPrimary"
-            android:textCursorDrawable="@color/colorPrimary"
             android:textSize="14sp" />
 
         <TextView
@@ -99,7 +98,6 @@
             android:paddingTop="4dp"
             android:textColor="@color/colorPrimary"
             android:textColorLink="@color/colorPrimary"
-            android:textCursorDrawable="@color/colorPrimary"
             android:textSize="14sp" />
 
         <Button

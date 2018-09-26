@@ -12,20 +12,14 @@ class AdvertAdapter(private val context: Context, private val list: ArrayList<Ad
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         var advert: Advert = getItem(position) as Advert
-        var inflateView: View
 
-        if (convertView == null) {
-            inflateView = LayoutInflater.from(context).
-                    inflate(R.layout.list_item, parent, false);
+         var   inflateView = LayoutInflater.from(context).
+                    inflate(R.layout.list_item, parent, false)
 
             val titleView: TextView = inflateView.findViewById(R.id.title)
             titleView.text = advert.title
             val desView: TextView = inflateView.findViewById(R.id.description)
             desView.text = advert.description
-
-        }else{
-            inflateView = convertView
-        }
         return inflateView
     }
 
